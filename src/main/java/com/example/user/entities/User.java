@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDate;
 
 /**
- * <description>
+ * User entity
  *
  * @author Ahmed Shakir
  * @version 1.0

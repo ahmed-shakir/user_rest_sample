@@ -5,6 +5,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 /**
+ * MongoDB repository for user entity
+ *
  * @author Ahmed Shakir
  * @version 1.0
  * @since 2020-10-15
