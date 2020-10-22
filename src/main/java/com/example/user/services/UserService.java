@@ -4,6 +4,8 @@ import com.example.user.entities.User;
 import com.example.user.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,7 @@ public class UserService {
 
     @Cacheable(value = "userCache", key = "#id")
     public User findById(String id) {
+        log.warn("Fresh data...");
         /* Tillvägagångssätt 1
         var userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
@@ -91,10 +94,12 @@ public class UserService {
                         String.format("Could not find the user by id %s.", id)));
     }
 
+    @CachePut(value = "userCache", key = "#result.id")
     public User save(User user) {
         return userRepository.save(user);
     }
 
+    @CachePut(value = "userCache", key = "#id")
     public void update(String id, User user) {
         if(!userRepository.existsById(id)) {
             log.error(String.format("Could not find the user by id %s.", id));
@@ -114,6 +119,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "userCache", key = "#id")
     public void delete(String id) {
         if(!userRepository.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, // 404 -> Not found
