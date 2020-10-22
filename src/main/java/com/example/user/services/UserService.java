@@ -4,14 +4,11 @@ import com.example.user.entities.User;
 import com.example.user.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,9 +47,10 @@ public class UserService {
      * D - Delete
      */
 
+    @Cacheable(value = "userCache")
     public List<User> findAll(String name, boolean sortOnBirthday) {
         log.info("Request to find all users");
-        log.warn("This is a log test");
+        log.warn("Fresh data...");
         //return userRepository.findAll();
         var users = userRepository.findAll();
         if(name != null) {
@@ -68,6 +66,7 @@ public class UserService {
         return users;
     }
 
+    @Cacheable(value = "userCache", key = "#id")
     public User findById(String id) {
         /* Tillvägagångssätt 1
         var userOptional = userRepository.findById(id);

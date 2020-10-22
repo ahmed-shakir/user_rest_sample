@@ -3,14 +3,12 @@ package com.example.user.controllers;
 import com.example.user.entities.User;
 import com.example.user.services.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -45,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> saveUser(@RequestBody User user) {
+    public ResponseEntity<User> saveUser(@Validated @RequestBody User user) {
         return ResponseEntity.ok(userService.save(user));
     }
 
@@ -57,7 +55,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateUser(@PathVariable String id, @RequestBody User user) {
+    public void updateUser(@PathVariable String id, @Validated @RequestBody User user) {
         userService.update(id, user);
     }
 
