@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * User entity
@@ -48,4 +49,5 @@ public class User implements Serializable {
     @Size(min = 4, max = 10, message = "Password length invalid")
     @NotBlank(message = "Password must contain a value")
     private String password;
+    private List<String> acl;
 }
