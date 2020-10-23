@@ -33,6 +33,7 @@ public class User implements Serializable {
     @Size(min = 3, max = 10 , message = "Firstname length invalid")
     private String lastname;
     @Past(message = "Birthday can not be present or in the future")
+    @NotNull(message = "Birthday can not be empty")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate birthday;

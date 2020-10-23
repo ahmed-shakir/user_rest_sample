@@ -1,17 +1,18 @@
 package com.example.user.controllers;
 
-import org.springframework.dao.DataIntegrityViolationException;
+import com.example.user.entities.validation.EntityError;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Error/exception handler common for all Controllers
@@ -21,26 +22,36 @@ import java.util.List;
  * @since 2020-10-16
  */
 @ControllerAdvice
-public class RestErrorHandler {
+public class RestErrorHandler extends ResponseEntityExceptionHandler {
 
-    //@ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<String> handleNotFound(ResponseStatusException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Could not find that...\nBest regards\nController Advice");
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        var entityErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> EntityError.builder()
+                        .field(fieldError.getField())
+                        .message(fieldError.getDefaultMessage())
+                        .rejectedValue(String.valueOf(fieldError.getRejectedValue()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.status(status).headers(headers).body(entityErrors);
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<List<String>> handleValidationErrors(DataIntegrityViolationException e, WebRequest request) {
-        var errors = new ArrayList<String>();
-        /*e.getConstraintViolations().forEach(constraintViolation -> {
-            errors.add(constraintViolation.getPropertyPath() + " : " + constraintViolation.getMessage());
-        });*/
-        return ResponseEntity.badRequest().body(List.of(e.getMessage()));
+    @Override
+    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        return ResponseEntity.status(status).headers(headers).body(ex.getBindingResult());
     }
 
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<List<ObjectError>> handleValidationErrors(BindException e) {
-        //return ResponseEntity.badRequest().body(e.getAllErrors());
-        return ResponseEntity.badRequest().body(null);
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String error = ex.getParameterName() + " parameter is missing";
+        return ResponseEntity.status(status).headers(headers).body(error);
     }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        String error = ex.getPropertyName() + " should be of type " + ex.getRequiredType().getName();
+        return ResponseEntity.status(status).headers(headers).body(error);
+    }
+
 }

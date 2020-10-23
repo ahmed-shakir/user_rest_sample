@@ -94,6 +94,11 @@ public class UserService {
                         String.format("Could not find the user by id %s.", id)));
     }
 
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, // 404 -> Not found
+                String.format("Could not find the user by username %s.", username)));
+    }
+
     @CachePut(value = "userCache", key = "#result.id")
     public User save(User user) {
         return userRepository.save(user);
