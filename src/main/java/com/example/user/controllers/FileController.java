@@ -13,6 +13,9 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 /**
@@ -47,9 +50,10 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
         }
 
-        var targetLocation = new File(uploadDirectory + File.separator + filename);
         try {
-            file.transferTo(targetLocation);
+            Files.copy(file.getInputStream(), Paths.get(uploadDirectory + File.separator + filename), StandardCopyOption.REPLACE_EXISTING);
+            //var targetLocation = new File(uploadDirectory + File.separator + filename);
+            //file.transferTo(targetLocation);
             /*byte[] bytes = file.getBytes();
             Path path = Paths.get(uploadDirectory + File.separator + filename);
             Files.write(path, bytes);*/

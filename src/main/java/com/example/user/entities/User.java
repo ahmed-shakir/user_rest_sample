@@ -1,10 +1,17 @@
 package com.example.user.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.*;
@@ -21,6 +28,9 @@ import java.util.List;
  */
 @Data // setters, getters, toString, equals, hashCode, RequiredArgsConstructor
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "user")
 public class User implements Serializable {
     private static final long serialVersionUID = 8480595839967663206L;
 
@@ -44,10 +54,15 @@ public class User implements Serializable {
     private String phone;
     @Size(min = 4, max = 10, message = "Username length invalid")
     @NotBlank(message = "Username must contain a value")
+    @Field("username")
     @Indexed(unique = true)
     private String username;
     @Size(min = 4, max = 10, message = "Password length invalid")
     @NotBlank(message = "Password must contain a value")
+    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private List<String> acl;
+    @DBRef
+    private Pet pet;
 }

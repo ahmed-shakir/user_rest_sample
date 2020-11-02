@@ -71,6 +71,27 @@ public class UserService {
         return users;
     }
 
+    public List<User> findAll(String fname, String lname, Boolean hasPet, boolean sortOnBirthday) {
+        log.info("Request to find all users");
+        var userStream = userRepository.findAll().stream();
+
+        if(fname != null) {
+            userStream = userStream.filter(user -> user.getFirstname().contains(fname));
+        }
+        if(lname != null) {
+            userStream = userStream.filter(user -> user.getLastname().contains(lname));
+        }
+        if(hasPet != null) {
+            userStream = userStream.filter(user -> (user.getPet() != null && hasPet) || user.getPet() == null && !hasPet);
+        }
+        var users = userStream.collect(Collectors.toList());
+
+        if(sortOnBirthday) {
+            users.sort(Comparator.comparing(User::getBirthday));
+        }
+        return users;
+    }
+
     @Cacheable(value = "userCache", key = "#id")
     public User findById(String id) {
         log.warn("Fresh data...");
@@ -110,8 +131,7 @@ public class UserService {
 
     @CachePut(value = "userCache", key = "#id")
     public void update(String id, User user) {
-        var isAdmin = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().toUpperCase().equals("ROLE_ADMIN"));
+        var isAdmin = checkAuthority("ADMIN");
         var isCurrentUser = SecurityContextHolder.getContext().getAuthentication()
                 .getName().toLowerCase().equals(user.getUsername().toLowerCase());
         if(!isAdmin && !isCurrentUser) {
@@ -143,5 +163,10 @@ public class UserService {
                     String.format("Could not find the user by id %s.", id));
         }
         userRepository.deleteById(id);
+    }
+
+    private boolean checkAuthority(String role) {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().toUpperCase().equals("ROLE_" + role));
     }
 }
