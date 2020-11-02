@@ -68,6 +68,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", roles = {"ADMIN"})
     void findAllUsers() throws Exception {
         given(userRepository.findAll()).willReturn(List.of(getValidUser()));
 
@@ -78,6 +79,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", roles = {"ADMIN"})
     void findUserById() throws Exception {
         given(userRepository.findById(any())).willReturn(Optional.of(getValidUser()));
 
@@ -102,6 +104,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", roles = {"ADMIN"})
     void saveUser() throws Exception {
         User user = getValidUser();
         user.setId(null);
@@ -177,6 +180,7 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", roles = {"ADMIN"})
     void deleteUser() throws Exception {
         //System.out.println("Authorities: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
 
